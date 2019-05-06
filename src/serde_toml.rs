@@ -1,4 +1,8 @@
 use serde::{Deserialize, Serialize};
+use std::{
+    path::Path,
+    collections::BTreeMap,
+};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Proto {
@@ -33,21 +37,15 @@ fn proto_from_file<P: AsRef<std::path::Path>>(path: P, lossy: bool) -> Result<Pr
     }
 }
 
-use std::{
-    path::Path,
-    collections::BTreeMap,
-};
-pub fn build_btree() -> BTreeMap<u16, Proto> {
+pub fn build_btree<P: AsRef<Path>>(list_path: P) -> BTreeMap<u16, Proto> {
     let mut btree = BTreeMap::new();
-    let list_path = Path::new("../test/FO4RP/proto/critters/critters.lst");
-    //let list_path = Path::new("../test/FO4RP/proto/items/items.lst");
-    let list = std::fs::read_to_string(list_path).unwrap();
+    let list = std::fs::read_to_string(list_path.as_ref()).unwrap();
     for path in list.lines() {
         let path = path.trim();
         if path.is_empty() {
             continue;
         }
-        let file = list_path.with_file_name(path);
+        let file = list_path.as_ref().with_file_name(path);
     //for file in std::fs::read_dir("../test/FO4RP/proto/critters/").unwrap().filter_map(|r| r.ok()) {
     //    let file = file.path();
         if !file.is_file() || file.extension() != Some("fopro".as_ref()) {
