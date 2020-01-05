@@ -1,6 +1,7 @@
 pub fn translate(ini: &str, with_comments: bool, filename: Option<&str>) -> String {
-    let mut toml = String::with_capacity(ini.len() + ini.len()/20);
-    for (line_num, line) in ini.lines().enumerate() {
+    let mut toml = String::with_capacity(ini.len() + ini.len() / 20);
+    for (line_num, mut line) in ini.lines().enumerate() {
+        line = line.trim_start_matches('\u{feff}').trim();
         let (line, comment) = split_until(line, '#');
 
         if line.is_empty() {
@@ -8,21 +9,30 @@ pub fn translate(ini: &str, with_comments: bool, filename: Option<&str>) -> Stri
         }
 
         if line.starts_with('[') {
-            if !line.ends_with(']') || line.len()<3{
-                panic!("Malformed section! {:?}:{:?} => {:?}", filename, line_num, line);
+            if !line.ends_with(']') || line.len() < 3 {
+                panic!(
+                    "Malformed section! {:?}:{:?} => {:?}",
+                    filename, line_num, line
+                );
             }
             toml.push_str("[[\"");
             //replace_in_place(line, &mut)
-            toml.push_str(&line[1..line.len()-1]);
+            toml.push_str(&line[1..line.len() - 1]);
             toml.push_str("\"]]")
         } else {
             let (key, val) = split_until(line, '=');
             if let Some(val) = val {
-                toml.push_str(key);
+                toml.push_str(&key.replace('.', "_"));
                 toml.push('=');
-                if !val.starts_with('0') && val.len()>0 && val.len()<20 && val.bytes().all(|byte| byte == b'-' || (b'0' <= byte && byte <= b'9')) {
-                //let val_u64: Result<i64, _> = val.parse();
-                //if val_u64.is_ok(){
+                if !val.starts_with('0')
+                    && val.len() > 0
+                    && val.len() < 20
+                    && val
+                        .bytes()
+                        .all(|byte| byte == b'-' || (b'0' <= byte && byte <= b'9'))
+                {
+                    //let val_u64: Result<i64, _> = val.parse();
+                    //if val_u64.is_ok(){
                     toml.push_str(val);
                 } else {
                     toml.push('"');
@@ -30,7 +40,10 @@ pub fn translate(ini: &str, with_comments: bool, filename: Option<&str>) -> Stri
                     toml.push('"');
                 }
             } else {
-                panic!("Line without equals sign! {:?}:{:?} => {:?}", filename, line_num, line);
+                panic!(
+                    "Line without equals sign! {:?}:{:?} => {:?}",
+                    filename, line_num, line
+                );
             }
         }
 
@@ -54,7 +67,7 @@ fn split_until(s: &str, delimeter: char) -> (&str, Option<&str>) {
     )
 }
 
-fn replace_in_place(original: &str, result: &mut String, from: char, to: &str, ) {
+fn replace_in_place(original: &str, result: &mut String, from: char, to: &str) {
     let mut last_end = 0;
     for (start, part) in original.match_indices(from) {
         result.push_str(unsafe { original.get_unchecked(last_end..start) });
