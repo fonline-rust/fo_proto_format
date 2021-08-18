@@ -24,7 +24,7 @@ pub fn translate(ini: &str, with_comments: bool, filename: Option<&str>) -> Stri
             if let Some(val) = val {
                 toml.push_str(&key.replace('.', "_"));
                 toml.push('=');
-                if !val.starts_with('0')
+                if val == "0" || !val.starts_with('0')
                     && val.len() > 0
                     && val.len() < 20
                     && val
@@ -83,14 +83,14 @@ mod test {
 
     #[test]
     fn fopro_generic() {
-        let ini = std::fs::read_to_string("../test/FO4RP/proto/items/generic.fopro").unwrap();
-        let toml = translate(&ini, true, None);
+        let ini = std::fs::read_to_string("../FO4RP/proto/items/generic.fopro").unwrap();
+        let _toml = translate(&ini, true, None);
         //println!("{}", toml);
     }
     #[test]
     fn fopro_food() {
-        let ini = std::fs::read_to_string("../test/FO4RP/proto/items/food.fopro").unwrap();
-        let toml = translate(&ini, true, None);
+        let ini = std::fs::read_to_string("../FO4RP/proto/items/food.fopro").unwrap();
+        let _toml = translate(&ini, true, None);
         //println!("{}", toml);
     }
 }

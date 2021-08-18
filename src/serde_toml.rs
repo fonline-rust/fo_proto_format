@@ -11,6 +11,7 @@ pub trait Proto: Debug + DeserializeOwned + Debug {
 pub struct ProtoItem {
     #[serde(alias = "Pid")]
     pub ProtoId: u16,
+    pub Type: u8,
     #[serde(alias = "PicMapName")]
     pub PicMap: String,
     pub Flags: Option<u32>,
@@ -35,6 +36,7 @@ impl Proto for ProtoCritter{
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+#[allow(bad_style)]
 pub struct Protos<T> {
     #[serde(alias = "Critter proto")]
     Proto: Vec<T>,
@@ -50,7 +52,7 @@ fn proto_from_ini<T: Proto>(ini: &str, filename: Option<&str>) -> Result<Protos<
     /*if let Err(err) = &res {
         let line = err.line_col().unwrap().0;
         let debug: Vec<_> = toml.lines().skip(line.saturating_sub(3)).take(7).collect();
-        std::fs::write("../../ini_to_toml.txt", &toml).unwrap();
+        std::fs::write("../ini_to_toml.txt", &toml).unwrap();
         println!("lines:\n{:?}", debug);
     }*/
     res
@@ -106,7 +108,7 @@ mod tests {
     use super::*;
     #[test]
     fn fopro_toml_all() {
-        for file in std::fs::read_dir("../test/FO4RP/proto/items/")
+        for file in std::fs::read_dir("../FO4RP/proto/items/")
             .unwrap()
             .filter_map(|r| r.ok())
         {
@@ -115,7 +117,7 @@ mod tests {
                 continue;
             }
             println!("Parsing {:?}", file);
-            if let Err(err) = proto_from_file::<ProtoItem>(&file, true) {
+            if let Err(err) = proto_from_file::<ProtoItem, _>(&file, true) {
                 panic!("Error parsing {:?} file: {:?}", file, err);
             }
         }
@@ -123,7 +125,7 @@ mod tests {
 
     #[test]
     fn tirs_2007() {
-        let btree = build_btree::<ProtoItem>("../FO4RP/proto/items/items.lst");
+        let btree = build_btree::<ProtoItem, _>("../FO4RP/proto/items/items.lst");
         let tirs = btree.get(&2007).expect("tirs 2007");
         println!("tirs: {:?}", tirs);
     }
