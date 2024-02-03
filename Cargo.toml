@@ -1,10 +1,12 @@
 [package]
 name = "fo_proto_format"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["qthree <qthree3@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-cini = "0.1.0"
-serde = { version="1.0.90", features=["derive"] }
-toml = "0.5.0"
+anyhow = "1"
+cini = "1.0"
+serde = { version="1", features=["derive"] }
+serde_json = "1"
+toml = "0.7.0"

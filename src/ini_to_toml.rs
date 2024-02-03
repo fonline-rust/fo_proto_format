@@ -3,10 +3,7 @@ pub fn translate(ini: &str, with_comments: bool, filename: Option<&str>) -> Stri
     for (line_num, mut line) in ini.lines().enumerate() {
         line = line.trim_start_matches('\u{feff}').trim();
         let (line, comment) = split_until(line, '#');
-
-        if line.is_empty() {
-            continue;
-        }
+        let line = line.trim_end();
 
         if line.starts_with('[') {
             if !line.ends_with(']') || line.len() < 3 {
@@ -19,7 +16,7 @@ pub fn translate(ini: &str, with_comments: bool, filename: Option<&str>) -> Stri
             //replace_in_place(line, &mut)
             toml.push_str(&line[1..line.len() - 1]);
             toml.push_str("\"]]")
-        } else {
+        } else if !line.is_empty() {
             let (key, val) = split_until(line, '=');
             if let Some(val) = val {
                 toml.push_str(&key.replace('.', "_"));

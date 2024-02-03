@@ -52,7 +52,7 @@ fn path_to(prefix: impl AsRef<Path>, to: impl AsRef<Path>) -> std::io::Result<Pa
 }
 
 fn ranges_for<T: Proto, P: AsRef<Path>, W: Write>(f: &mut W, path: P) -> std::fmt::Result {
-    let btree = build_btree::<T, _>(path);
+    let btree = build_btree::<T>(path);
     let mut first_free = 1;
     let mut inclusive_ranges = Vec::with_capacity(128);
     for (&key, _value) in &btree {
