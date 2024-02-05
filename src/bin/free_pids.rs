@@ -1,7 +1,10 @@
+use std::{
+    ffi::OsStr,
+    fmt::Write,
+    path::{Path, PathBuf},
+};
+
 use fo_proto_format::*;
-use std::ffi::OsStr;
-use std::fmt::Write;
-use std::path::{Path, PathBuf};
 
 const MAX_ITEM_PROTOTYPES: u16 = 30000;
 
@@ -12,7 +15,7 @@ fn main() {
         }
         Err(err) => {
             let err_string = format!("Error: {}", err);
-            std::fs::write("./free_pids.txt", &err_string).expect("Can't write error to file");
+            std::fs::write("./free_pids.txt", err_string).expect("Can't write error to file");
             panic!("{:?}", err);
         }
     }
@@ -55,7 +58,7 @@ fn ranges_for<T: Proto, P: AsRef<Path>, W: Write>(f: &mut W, path: P) -> std::fm
     let btree = build_btree::<T>(path);
     let mut first_free = 1;
     let mut inclusive_ranges = Vec::with_capacity(128);
-    for (&key, _value) in &btree {
+    for (key, _value) in btree {
         if key - first_free > 0 {
             inclusive_ranges.push((first_free, key - 1));
         }

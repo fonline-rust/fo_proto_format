@@ -1,6 +1,10 @@
-use std::{path::{PathBuf, Path}, ffi::OsStr, io::Result as IoResult};
+use std::{
+    ffi::OsStr,
+    io::Result as IoResult,
+    path::{Path, PathBuf},
+};
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use fo_proto_format::*;
 
 fn main() {
@@ -18,7 +22,8 @@ fn to_json() -> Result<()> {
     let btrees = build_btree_per_file::<ProtoItem>(items_path);
     for (file, btree) in btrees {
         let vec: Vec<_> = btree.values().collect();
-        let json = serde_json::to_string_pretty(&vec).with_context(|| file.display().to_string())?;
+        let json =
+            serde_json::to_string_pretty(&vec).with_context(|| file.display().to_string())?;
         let mut path = PathBuf::from("./output/");
         path.push(file.file_name().unwrap());
         path.set_extension("json");

@@ -1,9 +1,11 @@
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt::Debug,
+    path::PathBuf,
+};
+
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
-use std::path::PathBuf;
-use std::{collections::BTreeMap, path::Path};
-use std::fmt::Debug;
 
 pub trait Proto: Debug + DeserializeOwned + Debug {
     fn proto_id(&self) -> u16;
@@ -17,6 +19,8 @@ pub struct ProtoItem {
     pub ty: u8,
     #[serde(rename = "PicMap", alias = "PicMapName")]
     pub pic_map: String,
+    #[serde(default, rename = "PicInv", alias = "PicInvName")]
+    pub pic_inv: Option<String>,
     #[serde(rename = "Flags")]
     pub flags: Option<u32>,
     #[serde(rename = "Grid_Type")]
@@ -26,7 +30,7 @@ pub struct ProtoItem {
     #[serde(flatten)]
     pub extra_fields: HashMap<String, Value>,
 }
-impl Proto for ProtoItem{
+impl Proto for ProtoItem {
     fn proto_id(&self) -> u16 {
         self.proto_id
     }
@@ -38,7 +42,7 @@ pub struct ProtoCritter {
     #[serde(rename = "ProtoId", alias = "Pid")]
     pub proto_id: u16,
 }
-impl Proto for ProtoCritter{
+impl Proto for ProtoCritter {
     fn proto_id(&self) -> u16 {
         self.proto_id
     }
@@ -54,16 +58,18 @@ pub fn proto_from_toml<T: Proto>(toml: &str) -> Result<Protos<T>, toml::de::Erro
     toml::de::from_str(toml)
 }
 
-fn proto_from_ini<T: Proto>(ini: &str, filename: Option<&str>) -> Result<Protos<T>, toml::de::Error> {
+fn proto_from_ini<T: Proto>(
+    ini: &str,
+    filename: Option<&str>,
+) -> Result<Protos<T>, toml::de::Error> {
     let toml = crate::ini_to_toml::translate(ini, false, filename);
-    let res = proto_from_toml(&toml);
+    proto_from_toml(&toml)
     /*if let Err(err) = &res {
         let line = err.line_col().unwrap().0;
         let debug: Vec<_> = toml.lines().skip(line.saturating_sub(3)).take(7).collect();
         std::fs::write("../ini_to_toml.txt", &toml).unwrap();
         println!("lines:\n{:?}", debug);
     }*/
-    res
 }
 
 fn proto_from_file<T: Proto>(
@@ -80,7 +86,9 @@ fn proto_from_file<T: Proto>(
     }
 }
 
-pub fn build_btree_per_file<T: Proto>(list_path: impl AsRef<std::path::Path>) -> HashMap<PathBuf, BTreeMap<u16, T>> {
+pub fn build_btree_per_file<T: Proto>(
+    list_path: impl AsRef<std::path::Path>,
+) -> HashMap<PathBuf, BTreeMap<u16, T>> {
     let list = std::fs::read_to_string(list_path.as_ref()).unwrap();
     let mut res = HashMap::new();
     for path in list.lines() {

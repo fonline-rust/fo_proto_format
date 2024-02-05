@@ -21,12 +21,12 @@ pub fn translate(ini: &str, with_comments: bool, filename: Option<&str>) -> Stri
             if let Some(val) = val {
                 toml.push_str(&key.replace('.', "_"));
                 toml.push('=');
-                if val == "0" || !val.starts_with('0')
-                    && val.len() > 0
-                    && val.len() < 20
-                    && val
-                        .bytes()
-                        .all(|byte| byte == b'-' || (b'0' <= byte && byte <= b'9'))
+                if val == "0"
+                    || !val.starts_with('0')
+                        && (1..20).contains(&val.len())
+                        && val
+                            .bytes()
+                            .all(|byte| byte == b'-' || byte.is_ascii_digit())
                 {
                     //let val_u64: Result<i64, _> = val.parse();
                     //if val_u64.is_ok(){
